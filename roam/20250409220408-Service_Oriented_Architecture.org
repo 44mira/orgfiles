@@ -89,7 +89,6 @@
   - /code on demand/
   - A function or method we can call by sending an /HTTP request/ to a URL.
     - The service returns the result back as a /response/.
-  - 
   - Platform independent
 ** Benefits 
    - Exposing the existing function on the network
