@@ -1,0 +1,7 @@
+:PROPERTIES:
+:ID: 185c5abd-379f-4807-a486-fd392e5ce6ac
+:END:
+#+TITLE: sql_injections
+
+* SQL Injections
+

@@ -1,0 +1,549 @@
+:PROPERTIES:
+:ID: 2f51d1da-2158-488f-a56c-fc9ca63a1c54
+:END:
+#+TITLE: zig
+
+* zig
+** ~@import(comptime path: []const u8)~
+   - A built-in function that returns a representation of the imported code, and adds it to build.
+   - It is idiomatic to assign it to a ~const~ of the same name as the path
+     basename.
+   - Relative imports are relative to the file that is calling ~import~
+   - With the ~pub~ keyword, this allows access to outside of the file calling ~import~.
+
+   #+BEGIN_SRC zig
+   // common builtins
+   const std = @import("std"); // standard lib
+   const builtin = @import("builtin"); // target specific info
+   const root = @import("root"); // root source file, usually main.zig
+   #+END_SRC
+
+** Variable declarations
+   - ~const~
+   - ~var~
+   - ~ux~ and ~ix~ where ~x~ is the number of allocated bits. 
+     - ~x~ can be any positive number.
+     - Integers can be expressed in binary, octal, and hexadecimal form.
+       - They also support underscores for readability, they are not parsed.
+
+   | prefix | form   |
+   |--------+--------|
+   | ~0b~   | binary |
+   | ~0o~   | octal  |
+   | ~0x~   | hex    |
+
+   - Floats can be expressed in scientific notation, with ~e+~ or ~e-~ as the =10^x= factor.
+     - All forms in integers are supported, but ~e~ is replaced with ~p~ in hex floats.
+   - Declarations can be explicitly typed using ~: type~ syntax.
+     - It can also be inferred during compile time in situations where it is
+       well-defined.
+   - Declaration without initialization can be done using the ~undefined~
+     keyword.
+     - This will populate the variable with a garbage value of repeating ~0b10101010~ or ~0xAA~ in hex.
+       - This lets it be easily visible during debug mode.
+
+   #+BEGIN_SRC zig
+   const phone: u32 = undefined;
+   const num: u32 = 44;
+   var counter: i8 = 1;
+   counter += 1;
+
+   const inferred = @as(u32, 1); // type coercion
+   #+END_SRC
+
+** Arrays
+   - Standard arrays can be indexed just like any =C=-like language, with square brackets
+     - zero-index, idiomatically indexed by the ~usize~ type.
+       - ~usize~ depends on the computer architecture.
+     - Setting requires ~var~, duh
+   - Arrays have a ~.len~ property for accessing size.
+
+   #+BEGIN_SRC zig
+   var nums: [5]u8 = [5]u8{ 1, 2, 3, 4, 5 };
+
+   // or use inferred type and size
+   var nums = [_]u8{ 1, 2, 3, 4, 5 };
+   #+END_SRC
+
+*** Comptime operators
+    | operator | behavior           |
+    |----------+--------------------|
+    | ~++~     | concatenate arrays |
+    | ~**~     | repeat arrays      |
+
+*** Strings
+    - Essentially the same as a ~[_]u8~ type
+      - Single quoted characters are converted to ~u8~.
+      - Null-terminated for versatility and interopability with C.
+        - Uses a [[Sentinels][sentinel]] value, making the actual type ~*const [_:0]u8~
+          - Constant pointer to a null-terminated fixed-size array.
+    - Multi-line strings utilize =\\= double backslash.
+
+*** Slices
+    - Can be used to point to subarrays.
+      - Under the hood, stored as a pointer to the start and a length.
+    - Slice syntax is inclusive at the start, exclusive at the end.
+    - Slices of strings are of type ~[]const u8~.
+
+**** Syntax
+     #+BEGIN_SRC zig
+     const nums = [_]u8{2,3,4};
+     const last2: []u8 = nums[1..];
+     #+END_SRC
+** Control Flow
+*** If-Else
+    - Usual C-like syntax.
+    - *Only* accepts ~bool~ expressions as condition. There are no truthy and falsy values.
+    - Can be used as an expression, returning the last value in the branch.
+    - Can be used to capture optional values when they are not null.
+
+    #+BEGIN_SRC zig
+    const num: u32 = if (true) 5 else 3;
+
+    const opt: ?u32 = 5;
+    if (opt) |a| {
+        return a;
+    }
+    #+END_SRC
+*** Switch
+    - Must be exhaustive.
+    - Can be used as an expression.
+**** Syntax
+     #+BEGIN_SRC zig
+     const a = switch (expr) {
+       case1 => expr,
+       case2 => expr,
+       case3, case4 => expr,  // match patterns can be assigned to the same case
+       else => expr,
+     }
+     #+END_SRC
+
+**** Labelled Switches
+     - You can assign a [[Block Labels][label]] to switches to re-evaluate it with a different argument
+       - This can be used to simplify finite state machines.
+*** Loops
+    - Are also expressions
+      - ~break~ can return values.
+      - has an optional ~else~ branch that evaluates and returns the last value,
+        when executed with no ~break~.
+    - ~while~ loops can have a ~continue_expr~ that runs either at the end of an
+      iteration or whenever ~continue~ is called.
+
+**** Syntax
+
+     #+BEGIN_SRC zig
+     while (condition) : (continue_expr) {
+     // ...
+     }
+
+     // iterables should have same length
+     for (iter, ...) | element, ... | {
+     // ...
+     }
+
+     // element can be iterated by reference
+     for (iter, 0..) | *element, idx | {
+       const idx_32 : u32 = @IntCast(idx);
+     // ..
+     }
+     #+END_SRC 
+
+** Functions
+   - All functions are private by default. Use ~pub~ to set them public.
+   - Arguments are declared ~const~ within the function scope regardless of how they were declared in the calling scope.
+
+*** Syntax
+    #+BEGIN_SRC zig
+    fn func_name(param: type) type {
+        //...
+    }
+    #+END_SRC
+
+** Enums
+   - Set of numbers under the hood
+     - The type of number can be set with ~enum(u8){ ... }~
+     - The underlying integer can be retrieved with ~@IntFromEnum~
+   - When using a ~switch~ with an enum, it is okay to omit the enum name.
+   - Also supports ~var~ and ~const~ declarations, and methods. See [[Structs]].
+     - These act as namespaced properties.
+
+*** Syntax
+    #+BEGIN_SRC zig
+    const Gamestate = enum {
+      Win,
+      Loss,
+      Tie,
+    };
+
+    const win: Gamestate = Gamestate.Win;
+    switch (win) {
+      .Win => expr,
+      .Loss => expr,
+      .Tie => expr,
+    };
+    #+END_SRC
+** Errors
+   - In Zig, errors are treated as values.
+   - We define them in /error sets/.
+     - A special type of ~enum~.
+   - Moreover, we can set types as /error unions/, a parallel to the Rust ~Result~ type.
+   - We can resolve an error using ~catch~.
+     - ~try~ is a shorthand for ~catch |err| return err~
+       - commonly used for propagating errors down a call stack.
+   - The keyword ~unreachable~ acts as a programmer's assertion, that a branch of code should
+     not be executed
+     - This allows the compiler to make optimizations
+
+*** Syntax
+    #+BEGIN_SRC zig
+    const FileError = error { 
+      FileNotFound,
+      PermissionError,
+      NoOpen,
+    };
+
+    pub fn main() void {
+      const err: FileError = FileError.FileNotFound; 
+
+      // Error Union
+      var file: FileError!u32 = 5;
+      file = FileError.NoOpen;
+    }
+    #+END_SRC
+
+    #+BEGIN_SRC zig
+    fn canError(n: u32) MyError!u32;
+    // ...
+    const num: u32 = canError(5) catch 5;
+    const num: u32 = canError(5) catch |e| 5; // we can also refer to the error
+    #+END_SRC
+
+** Defer
+   - Can be used to delay execution of an expression to just after a function scope is exited.
+   - ~errdefer~ only executes when the block exits with an error.
+     - This can be used for cleanups.
+
+*** Syntax
+    #+BEGIN_SRC zig
+    const std = @import("std");
+    pub fn main() void {
+      defer std.debug.print("two", .{});
+      errdefer std.debug.print("errored!", .{});
+
+      std.debug.print("one", .{});
+    }
+    #+END_SRC
+
+** Structs
+   - Similar to C structs, grouping together related values.
+   - Supports default values.
+   - Most be exhaustively initialized, as there are no default zero values.
+   - Supports methods by adding functions as properties.
+     - Accessed with dot notation.
+     - Methods with the first argument as a pointer to the struct or a copy will be instance methods.
+   - Struct types are anonymous by default.
+     - Named by assigning them to variables or returning them from functions.
+   - Anonymous struct literals can be created with ~.{}~ syntax.
+
+*** Syntax
+    #+BEGIN_SRC zig
+    const Point = struct{ x: i32, y: i32 };
+    // ...
+    const p1 = Point { .x=2, .y=4 };
+
+    fn Circle(comptime T: type) type {
+        return struct {
+            center_x: T,
+            center_y: T,
+            radius: T,
+        };
+    };
+
+    // anonymous struct literal
+    .{ .center_x = 5, .center_y = 5 };
+    #+END_SRC
+
+*** Tuples
+    - Anonymous struct literals with no field names.
+    - Field names are assigned with increasing numbers from 0.
+      - Accessed with [[file:/home/mira/orgfiles/roam/20250406162828-zig_builtins.org::*~@"identifier"~][~@"identifier"~]] syntax
+** Pointers
+   - Same syntax as C for declaring and referencing.
+   - Pointer dereferencing is done with ~.*~.
+   - Pointers to structs to do not need to be dereferenced to access the properties.
+*** Pointer types
+    | syntax                  | meaning                          |
+    |-------------------------+----------------------------------|
+    | ~const ptr: *const var~ | both pointer and var is constant |
+    | ~var ptr: *var~         | both pointer and var is variable |
+    | ~var ptr: *const var~   | the var pointed to is constant   |
+    | ~const ptr: *var~       | the pointer itself is constant   |
+
+*** Syntax
+    #+BEGIN_SRC zig
+    const num: u8 = 42;
+    const nptr: *u8 = &num;
+
+    std.debug.print("{}", .{nptr.*});
+    #+END_SRC
+
+*** Many-Pointer
+    - A way to point to many items without using a slice.
+    - The main difference with directly using a slice is that slices have a known length. Many-pointers do not.
+**** Syntax
+     #+BEGIN_SRC zig
+     var nums = [_]u8{ 1, 2, 3 };
+     const nptr: [*]u8 = &nums;
+     const nslice: []u8 = nptr[0..3];
+     #+END_SRC
+** Optionals
+   - Declaring nullable values by prepending =?= to the type.
+   - We can coalesce errors using the ~orelse~ keyword.
+     - A shorthand for ~orelse unreachable~ is ~.?~.
+*** Syntax
+    #+BEGIN_SRC zig
+    var num: ?u8 = null;
+    const five: u8 = num orelse 5;
+    const exists: u8 = num.?;
+    #+END_SRC
+
+** Unions
+   - Store the different data in the same memory address.
+     - Uses the largest type to determine the amount of memory to allocate.
+   - When one field becomes active, the rest can no longer be accessed.
+   - Syntax looks just like a struct.
+   - Usually used in tandem with ~enums~ to determine which field is active.
+*** Syntax
+    #+BEGIN_SRC zig
+    const Unsigned = union {
+      small: u8,
+      medium: u16,
+      large: u32,
+    };
+    #+END_SRC
+
+*** Tagged Unions
+    - We can provide unions with enums to make the checking terser.
+      - A shorthand for tagging unions is to pass ~enum~ as the tagging enum.
+    - Also known as /variants/.
+
+**** Syntax
+     #+BEGIN_SRC zig
+     const tags = enum { small, medium, large };
+     const Unsigned = union(tags) {
+         small: u8,
+         medium: u16,
+         large: u32,
+     };
+     const InferredUnsigned = union(enum) {
+         small: u8,
+         medium: u16,
+         large: u32,
+     };
+
+     const uint = InferredUnsigned{ .small = 5 };
+     switch (uint) {
+         .small => |s| expr,
+         .medium => |m| expr,
+         .large => |l| expr,
+     };
+     #+END_SRC
+
+** Coercions
+*** Types can always be made /more/ restrictive.
+    #+BEGIN_SRC zig
+    var n: u8 = 5;
+    var p1: *u8 = &n;
+    var p2: *const u8 = p1;
+    #+END_SRC
+*** Numeric types can be /widened/.
+    - Both integer and floats.
+    #+BEGIN_SRC zig
+    var n: u8 = 5;
+    var n2: u16 = n;
+    #+END_SRC
+
+*** Single-item pointers coerce to slices and many-item pointers
+    #+BEGIN_SRC zig
+    const nums = [3]u8{1, 2, 3};
+    const p1: []const u8 = &nums;
+    const p2: [*]const u8 = &nums;
+    #+END_SRC
+
+*** Single-item mutable pointers can coerece to single-item pointers pointing to an array of length 1
+    #+BEGIN_SRC zig
+    var five: u8 = 5;
+    var a_five: *[1]u8 = &five;
+    #+END_SRC
+
+*** Payload types and null can coerce to optionals
+*** Payload types and errors can coerce to error unions
+*** ~undefined~ can coerce to any type
+*** Compile-time numbers coerce to compatible types
+*** Tagged unions coerce to the current tagged enum.
+
+** Block Labels
+   - Can be used to escape nested loops
+   - Can be used to evaluate blocks and return values with ~break~.
+*** Syntax
+    #+BEGIN_SRC zig
+    lbl: {
+      const ret = "This is an expresssion";
+      break :lbl ret;
+    }
+    #+END_SRC
+
+** Comptime
+   - Everything outside of any function in a source file is by default ~comptime~.
+   - All numeric literals are of type ~comptime_int~ and ~comptime_float~.
+     - They are inserted in code at compile time.
+   - However, this cannot be done with ~var~ types, as they need to be stored in the RAM during runtime.
+     - They need to know the space to be allocated, hence the need to type with ~u8~ and such.
+*** The ~comptime~ keyword
+    - Added before a variable declaration
+      - Guarantees that every usage of the variable is performed at compile time.
+    - Added before function parameters
+      - Enforces that it should be known at compile time.
+      - Required for passing types as arguments.
+        - This is how you would make generic functions.
+*** ~anytype~
+    - Let Zig infer the type at compile time.
+    - We can use the following builtin functions to ducktype with ~anytype~ 
+      - [[file:/home/mira/orgfiles/roam/20250406162828-zig_builtins.org::*~@TypeOf(...) type~][@TypeOf]]
+      - [[file:/home/mira/orgfiles/roam/20250406162828-zig_builtins.org::*~@hasDecl(comptime Container: type, comptime name: []const u8) bool~][@hasDecl]]
+
+*** ~inline~
+    - Used for loops to run at compile time.
+    - ~else~ branches in ~switch~ statements can also be inlined.
+** Sentinels
+   - Indicates the end of data.
+   - The sentinel value must be of the same type as the data it is ending.
+*** Syntax
+    #+BEGIN_SRC zig
+    const a: [4:0]u8 = [4:0]u8{ 1, 2, 3, 4 };
+    const b: [:0]const u8 = &[_:0]u8{ 1, 2, 3, 4};
+    const c: [*:0]const u8 = &[_:0]u8{ 1, 2, 3, 4};
+    #+END_SRC
+
+** Async
+   - Stack frames can be stored by an ~async~ assignment.
+     - Function calls that are guaranteed to not suspend can be called with ~nosuspend~.
+     - Functions that are async use ~suspend {}~ instead of returning.
+       - The block after ~suspend~ is called when it suspends.
+     - Stack frames can be resumed with ~resume <stack_frame>~.
+   - If an async function call is not marked async, the function calling it becomes async.
+     - ~main~ cannot be async.
+   - Async function return values can be waited for using ~await~.
+
+*** Syntax
+    #+BEGIN_SRC zig
+    var global_counter: u32 = 0;
+
+    pub fn main() void {
+      const frame = async foo();
+
+      resume frame;
+    }
+
+    fn foo() {
+      while (true) {
+        global_counter += 1;
+        suspend {};
+      }
+    }
+    #+END_SRC
+
+** C interopability
+   - Import C libraries using ~@cImport~
+     - The arguments will be a block of ~@cInclude~.
+   - Compile with ~zig run -lc <prog_name>.zig~
+
+   #+BEGIN_SRC zig
+   const c = @cImport({
+       @cInclude("unistd.h");
+   });
+   #+END_SRC
+
+** Allocators
+   - ~std.heap.ArenaAllocator~ is recommended to group the freeing of allocated memory.
+   - ~std.heap~ has allocators for various usecases.
+     - ~std.heap.page_allocator~ is the go-to allocator for Zig.
+     - ~std.heap.c_allocator~ uses C-style allocation.
+     - ~std.heap.raw_c_allocator~ directly calls ~malloc~ and ~free~.
+     - ~std.testing.allocator~ used in ~test~ blocks.
+   - Used in tandem with ~defer~ to guarantee freeing.
+*** Syntax
+    #+BEGIN_SRC zig
+    pub fn main() !void {
+      // pretend this was defined by reading in user input
+      const arr: []const f64 = &[_]f64{ 0.3, 0.2, 0.1, 0.1, 0.4 };
+
+      // initialize the allocator
+      var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+
+      // free the memory on exit
+      defer arena.deinit();
+
+      // initialize the allocator
+      const allocator = arena.allocator();
+
+      // allocate memory for this array
+      const avg: []f64 = try allocator.alloc(f64, arr.len);
+    }
+    #+END_SRC
+
+** Testing
+   - Can be written in source files.
+   - Run with ~zig test~.
+*** Syntax
+    #+BEGIN_SRC zig
+    const testing = @import("std").testing;
+
+    test "division" {
+      try testing.expect(div(10, 2) == 5);
+      try testing.expectEqual(div(5, 5), 1);
+      try testing.expectError(error.DivideByZero, div(1, 0));
+    }
+    #+END_SRC 
+
+** Multi-threading
+*** Syntax
+    #+BEGIN_SRC zig
+    pub fn main() !void {
+      // This is where the preparatory work takes place
+      // before the parallel processing begins.
+      std.debug.print("Starting work...\n", .{});
+
+      // These curly brackets are very important, they are necessary
+      // to enclose the area where the threads are called.
+      // Without these brackets, the program would not wait for the
+      // end of the threads and they would continue to run beyond the
+      // end of the program.
+      {
+          // Now we start the first thread, with the number as parameter
+          const handle = try std.Thread.spawn(.{}, thread_function, .{1});
+
+          // Waits for the thread to complete,
+          // then deallocates any resources created on `spawn()`.
+          defer handle.join();
+
+          // Second thread
+          const handle2 = try std.Thread.spawn(.{}, thread_function, .{2}); // that can't be right?
+          defer handle2.join();
+
+          // Third thread
+          const handle3 = try std.Thread.spawn(.{}, thread_function, .{3});
+          defer handle3.join(); // <-- something is missing
+
+          // After the threads have been started,
+          // they run in parallel and we can still do some work in between.
+          std.time.sleep(1500 * std.time.ns_per_ms);
+          std.debug.print("Some weird stuff, after starting the threads.\n", .{});
+      }
+      // After we have left the closed area, we wait until
+      // the threads have run through, if this has not yet been the case.
+      std.debug.print("Zig is cool!\n", .{});
+    }
+    #+END_SRC
+* builtins
+  - Refer to [[id:8c5b846b-0e97-4fa7-98f9-d92e1d437323][zig_builtins]] 

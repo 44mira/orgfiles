@@ -1,0 +1,51 @@
+:PROPERTIES:
+:ID: 8c5b846b-0e97-4fa7-98f9-d92e1d437323
+:ROAM_ORIGIN: 2f51d1da-2158-488f-a56c-fc9ca63a1c54
+:END:
+#+TITLE: zig_builtins
+
+* zig builtins
+  - Functions that return types are pascal-cased.
+** Math
+*** ~@sqrt~
+*** ~@abs~
+*** ~@sin~
+*** ~@cos~
+*** ~@exp~
+*** ~@log~
+*** ~@floor~
+*** ~@mod~
+** Introspection
+*** ~@This()~
+    - Returns the innermost struct, enum, or union that a function call is inside.
+*** ~@typeInfo(comptime T: type) @import("std").builtin.Type~
+    - Returns information about any type in a data structure
+      - Contains different information depending on which type you're examining.
+*** ~@TypeOf(...) type~
+    - Returns the type common to all arguments.
+      - It is resolved using /peer type resolution/, same as the compiler.
+*** ~@hasDecl(comptime Container: type, comptime name: []const u8) bool~
+    - Checks if a type has the given /decl/
+      - Short for declaration.
+      - Methods or properties.
+    - Used for duck-typing.
+    - Commonly used with ~@TypeOf~ and ~anytype~.
+** Coercion
+*** ~@as(comptime T: type, expression: anytype) T~
+    - Builtin type coercion.
+*** ~@ptrCast(value: anytype) anytype~
+    - Cast a pointer to the inferred type.
+** ~@addWithOverflow(a: anytype, b: anytype) struct { @TypeOf(a, b), u1 }~
+   - Returns a tuple with the result and a possible overflow bit.
+** ~@bitReverse(integer: anytype) T~
+   - Reverses the bits of an integer, including the sign bit.
+** ~@intFromEnum(enum_or_tagged_union: anytype) anytype~
+   - Converts an enum or tagged union into its integer enumeration value.
+
+** ~@compileLog(...)~
+   - Prints arguments during compile time.
+   - Acts as an error that points to where the call is made.
+** ~@"identifier"~
+   - Allow for any identifier.
+** ~@field(lhs: anytype, comptime field_name: []const u8) (field)~
+   - Access a struct field at compile time.

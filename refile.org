@@ -1,0 +1,8 @@
+#+TITLE:     Refile
+#+AUTHOR:    tyrael
+#+DATE:      2025-03-23
+
+#+BEGIN_COMMENT
+File for captures and things to be refiled
+#+END_COMMENT
+

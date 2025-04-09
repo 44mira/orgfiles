@@ -1,0 +1,74 @@
+#+TITLE:     Portfolio todos
+#+AUTHOR:    Tyrael Lada
+#+DATE:      2025-03-29
+
+* TODO Portfolio
+- [x] ~npm create astro@latest~
+- [X] add tailwind
+  - [X] install ~tailwind~ and ~@tailwindcss/vite~
+  - [X] configure vite plugin
+  - [X] create global =.css=
+  - [X] import in =index.astro=
+  - [X] palette
+- [X] add navbar
+  - [X] make component
+  - [X] social links
+  - [X] resume button
+  - [X] logo
+  - [X] make layout component
+  - [X] make resume link
+  - [X] make layout use ~ClientRouter~ for view transitions
+- [X] add hero
+  - [X] make component
+  - [X] hero text
+  - [X] spinning donut
+  - [X] fix padding
+- [X] add principles list
+  - [X] design in figma
+  - [X] make component
+  - [X] make card component
+  - [X] specialization is for insects
+  - [X] code is poetry
+  - [X] less is more
+  - [X] complexity through composition
+- [ ] add projects
+  - [ ] design in figma
+  - [ ] clv
+  - [ ] gosweeper
+  - [ ] snol
+  - [ ] vivi
+  - [ ] kitschy
+  - [ ] pahinungod
+  - [ ] durianpy website
+  - [ ] this portfolio site!
+- [ ] certifications
+  - [ ] design in figma
+  - [ ] datacamp
+  - [ ] hackerrank
+- [ ] add organizations
+  - [ ] design in figma
+  - [ ] DurianPy (Developer Volunteer)
+  - [ ] SPARCS (Director of Technology and Skill-building)
+  - [ ] GDG Davao (GDG DevFest Davao 2025 Programs Head)
+- [ ] add work experience
+  - [ ] design in figma
+  - [ ] ingenuity software
+- [ ] speakerships
+  - [ ] design in figma
+  - [ ] pycon apac /mathematical visualizations in python using manim/
+  - [ ] techkwentuhan (devcon) /code poetry/
+  - [ ] sparcs bitwise /code instict: list mastery/
+  - [ ] sparcs workshop /vim training arc/
+  - [ ] durianpy /python shell scripting: creating your own workflows with python/
+- [ ] footer
+  - [ ] design in figma
+  - [ ] references
+    - [ ] donut.js
+    - [ ] palette
+  - [ ] quicklinks
+- [ ] metadata
+  - [ ] favicon
+  - [ ] seo
+  - [ ] opengraph
+- [ ] responsiveness
+

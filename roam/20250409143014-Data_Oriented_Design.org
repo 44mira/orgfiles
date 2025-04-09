@@ -1,0 +1,47 @@
+:PROPERTIES:
+:ID: 12c38193-ba28-40db-bf2f-d517ca07336e
+:END:
+#+TITLE: Data Oriented Design
+
+* Data Oriented Design
+  #+BEGIN_QUOTE
+  CPU is fast, main memory is slow.
+  #+END_QUOTE
+
+  - Natural alignment
+    - Largest value in a struct
+* Nic Barker (Clay) 
+** 1. Efficient layout and storage
+*** Arrange based on alignment
+    - Order based in size
+    - Already optimized in Zig
+*** Booleans are combinatorial
+    - Reduce logically, store [[2. Store booleans *out-of-band*][out-of-band]]
+*** *Avoid* strings!
+    - If a human is not going to read it, don't use string.
+*** Determine if order matters.
+    - Hashsets over lists!
+    - Swapback arrays work too.
+      - Replace removed element with last element and reduce size.
+** 2. One task at a a time, /many repetitions/
+   - Process things in *bulk*!
+   - Try to preserve the L1 Cache during processing.
+** 3. Do work /ahead/ of time
+   - Lift /invariants/ out of loops
+   - That is, values that do not change inside loops should be cached
+   - Use [[3. Eliminate padding by using Struct-of-Arrays][struct of arrays]] to encode data.
+** 4. Parallelism*
+* Andrew Kelley (Zig talk) 
+** 1. Use indices instead of pointers
+   - This makes the size consistent between architectures.
+   - Watch out for type safety.
+   - /Handles are better pointers/.
+** 2. Store booleans *out-of-band*
+   - Downsize the enum state if possible
+     - Identify the only logical combinations into enums
+     - Better yet, /store/ the information in their variable context instead
+** 3. Eliminate padding by using Struct-of-Arrays
+   - Instead of using /Arrays of Structs/ (AoS), use /Structs of Arrays/ (SoA).
+** 4. Store sparse data in hashmaps
+
+

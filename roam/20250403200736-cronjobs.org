@@ -1,0 +1,37 @@
+:PROPERTIES:
+:ID: a4afe17c-ea86-46c2-a7d0-0d30c89c2ed2
+:END:
+#+TITLE: cronjobs
+
+* crontab 
+  - A group of cronjobs (scheduled jobs) for a user
+
+** =crontab= command flags
+   - =-l=
+     - list all cronjobs on the crontab
+   - =-e=
+     - create a cronjob on the crontab
+   - =-u=
+     - target specific user's crontab
+
+* cronjobs
+  - Commands should use */absolute paths/*.
+  - Asterisk =*= stands for /every/
+
+** Asterisk legend:
+   Syntax: 
+   #+BEGIN_QUOTE
+   m h dom mon dow command
+   * * * * *       command
+   #+END_QUOTE
+
+   |--------+------+------------------+-------+-----------------|
+   | minute | hour | day of the month | month | day of the week |
+
+** Shorthands
+   - =@hourly=
+     - equivalent to =0 * * * *=
+   - =@daily=
+     - equivalent to =0 0 * * *=
+   - =@reboot=
+     - on system reboot
