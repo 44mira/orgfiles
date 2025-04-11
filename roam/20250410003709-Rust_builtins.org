@@ -1,0 +1,17 @@
+:PROPERTIES:
+:ID: 8cd0f5f9-7155-4b64-987a-f693b9820614
+:ROAM_ORIGIN: fa93e09e-601f-4983-9532-ad2c089e34ec
+:END:
+#+TITLE: Rust builtins
+
+* Macros
+** ~println!~ and ~print!~
+   - Main standard output of the program.
+   - Format input using ={}= and providing variable args.
+
+** ~collection.iter()~ and ~collection.iter_mut()~
+   - Provide iterators for collections.
+** ~heapvar.clone()~
+   - Perform a deep-copy and return the copy.
+   - Expensive!
+

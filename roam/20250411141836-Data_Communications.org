@@ -1,0 +1,82 @@
+:PROPERTIES:
+:ID: 82855ed4-dc1c-4c35-8eae-346d01afa657
+:END:
+#+TITLE: Data Communications
+
+* Communications Model
+  #+BEGIN_QUOTE
+  source -> transmitter -> transmission system -> receiver -> destination
+  #+END_QUOTE
+
+** Source
+   - Generates data to be transmitted
+** Transmitter
+   - Converts data to transmittable signals
+** Transmission System
+   - Carries data
+** Receiver
+   - Converts received signal into data
+** Destination
+   - Takes incoming data
+
+* OSI Model
+  - /Open Systems Interconnection/
+  - An open system but is /not/ a protocol
+  - Seven layers
+  - [[TCP/IP][TCP/IP]] is the de facto standard
+** Layers
+*** Application
+    :PROPERTIES:
+    :CUSTOM_ID: osi-application
+    :END:
+*** Presentation
+*** Session
+*** Transport
+*** Network
+    - Responsible for delivery of individual *packets* from the source host to the destination host.
+*** Data Link
+    - Responsible for moving *frames*.
+    - Node-to-node delivery
+    - Transforms the raw transmission into a reliable link
+    - Other responsibilities:
+      - Framing, physical addressing
+      - Flow control, error control, access control
+*** Physical
+    - Responsible for movement of *bits* from one hop (node) to the next
+    - Deals with mechanical and electrical specs of the interface and medium
+    - Concerned with the following:
+      - Line configuration, topology
+      - Transmission mode, transmission medium
+      - Interface, signals, encoding
+* TCP/IP
+  - /Transmission Control Protocol/ / /Internet Protocol/
+  - A set of standards that describe how data is to be transferred between computers.
+** Layers
+*** Application
+    - Encompasses OSI Model's [[#osi-application][Application]], [[Presentation]] and [[Session]] layers.
+*** Transport (host-to-host)
+    - Encompasses OSI Model's [[Session]].
+*** Internet
+    - Encompasses OSI Model's [[Network]].
+*** Network Access
+    - Encompasses OSI Model's [[Network]] and [[Data Link]].
+*** Physical
+    - Encompasses OSI Model's layer of the same name.
+
+* Data Communications System
+** Fundamental Characteristics
+*** Delivery
+    - Deliver data to the correct destination
+*** Accuracy
+    - Deliver data accurately
+*** Timeliness
+    - Deliver data in a timely manner
+
+** Data Representations
+   - Information comes in different forms
+     - Text
+     - Numbers
+     - Images
+     - Audio
+     - Video
+

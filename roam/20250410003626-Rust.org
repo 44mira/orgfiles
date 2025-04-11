@@ -1,0 +1,308 @@
+:PROPERTIES:
+:ID: fa93e09e-601f-4983-9532-ad2c089e34ec
+:END:
+#+TITLE: Rust
+
+* Rust
+** Data Types
+*** Scalar types
+    - Usual integer types such as ~u32~ and ~isize~.
+    - Various number literals are supported (~0b~, ~0x~, ~0o~)
+      - Underscore separator on decimals are supported
+      - Bytes can be represented as ~b'A'~ (~u8~ only)
+    - ~f32~ and ~f64~ for floats
+    - ~char~ type for UTF-8.
+    - 
+*** Wrapping arithmetic
+    - Wrapping behavior is a compiler error in non-release modes.
+      - Use the following functions to allow for explicit wrapping
+    | function        | behavior                                       |
+    |-----------------+------------------------------------------------|
+    | ~wrapping_*~    | allows wrapping                                |
+    | ~checked_*~     | returns ~None~ when overflowed                 |
+    | ~overflowing_*~ | result value and a boolean indicating overflow |
+    | ~saturating_*~  | saturate at min and max                        |
+
+*** Compound types
+    - Array type, compile time size
+      - ~[i32; 5]~
+      - Can be initialized with one value with the same syntax ~[5; 100]~
+    - Tuple type
+      - ~(i32, u32, i32)~
+      - Can be indexed with dot notation ~tup.1~
+*** Slices
+    - A reference to a *contiguous sequence* in a collection
+    - Kind of a reference
+      - Does not have ownership
+    - Typed as ~&str~ and ~&[i32]~
+**** Syntax
+     #+BEGIN_SRC rust
+     let s = String::from("hello");
+
+     let slice = &s[1..];
+     let slice = &s[..2];
+     #+END_SRC
+** Variables
+   - Immutable by default.
+     - Can be made mutable with ~mut~
+   - Types are declared with a colon =:=
+     - Can be inferred if well-defined
+       - Will coerce if not
+   - Can be /shadowed/.
+   - Variables can be destructured with tuples.
+
+   #+BEGIN_SRC rust
+   const NUMBER: u32 = 55;
+   let v: i32 = 42;
+   let mut v = 12; // inferred
+
+   let v: i32 = 2; // shadowed
+   v = 13;
+   #+END_SRC
+
+*** Keywords
+    | keyword   | meaning                                                              | convention      |
+    |-----------+----------------------------------------------------------------------+-----------------|
+    | ~let~     | introduce a new variable, or shadow an existing one                  | snakecase       |
+    | ~let mut~ | introduce a new mutable variable, or shadow an existing one          | snakecase       |
+    | ~const~   | declare a variable known at compile time, has to be explicitly typed | upper snakecase |
+** Functions
+   - Expressions (no semicolon) are implicitly returned.
+   - Parameters can pattern match.
+*** Syntax
+    #+BEGIN_SRC rust
+    fn main() {
+      // ...
+    }
+
+    pub fn hello(x: u32) -> &str {
+      if x > 2 {
+        return "HELLO";
+      }
+      return "Goodbye.";
+    }
+    #+END_SRC
+** Control Flow
+   - Are all expressions.
+     - Which means they return a value.
+*** If-Else
+    #+BEGIN_SRC rust
+    if condition {
+      //...
+    } else if {
+      //...
+    } else {
+      //...
+    }
+    #+END_SRC
+*** Loops
+    #+BEGIN_SRC rust
+    for i in 0..n {
+      print!("{i}");
+    }
+    #+END_SRC
+*** Match
+    - Pattern matching using ~match~
+    - Can be used to destructure [[Structs][structs]] and [[Enums][enums]].
+    - Values can be discarded when matched to ~_~
+      - Partial discarding can be done wwith ~..~, i.e. for matching a specific struct field only
+        - Must be unambiguous.
+    - Match guards can be added by appending an ~if~ condition to a pattern
+    - You can bind to constants using ~@~ syntax.
+      - ~3..=5 @ a~ to bind the specific pattern that matched.
+**** Syntax
+     #+BEGIN_SRC rust
+     match x {
+       1 | 2 => expr,  // union
+       3..=4 => expr,  // inclusive range
+       _ => expr,
+     };
+     #+END_SRC
+
+*** If-Let
+    - Shorthand for a single-arm ~match~.
+      - An ~else~ arm can be specified.
+**** Syntax
+     #+BEGIN_SRC rust
+     let config_max = Some(3u8);
+     match config_max {
+       Some(max) => println!("The maximum is configured to be {max}"),
+       _ => println!("It was not configured"),
+     }
+
+     let config_max = Some(3u8);
+     if let Some(max) = config_max {
+       println!("The maximum is configured to be {max}");
+     } else {
+       println!("It was not configured");
+     }
+     #+END_SRC
+*** Let-else
+    - Unpack a value or execute a fallback branch.
+**** Syntax
+     #+BEGIN_SRC rust
+     let Coin::Quarter(state) = coin else {
+       return None;
+     };
+     #+END_SRC
+*** While-Let
+    - Iterate while a match exists.
+** Vectors
+*** Syntax
+    #+BEGIN_SRC rust
+    let xs: Vec<u32> = Vec::new();
+    let xs = vec![2,3,4];
+    #+END_SRC
+ 
+** Ownership & Borrowing
+*** Stack & Heap
+    - All data stored on the stack must have a known fixed size.
+    - A size that might change or one that is unknown at compile time can only be stored on the heap.
+      - Requires allocation.
+    - Pushing to the stack is always faster than allocating on the heap.
+    - Accessing data on the heap is slower than accessing data on the stack.
+*** Ownership Rules
+    - Each value has an /owner/.
+    - There can only be one owner at a time.
+    - When the owner goes out of scope, the value is dropped.
+      - =RAII=!
+*** Moving
+    - Assigning a heap-allocated variable to another variable /moves/ it.
+      - This applies to function arguments and returns too!
+        - Moved arguments can be casted to ~mut~.
+      - This is dependent on the *[[Traits][trait]]* ~Drop~.
+      - This is contrary to the expected copying from other languages.
+        - This behavior is what happens on stack variables though.
+          - This is dependent on the [[Traits][trait]] ~Copy~.
+      - A move is a shallow copy that *invalidates* the original pointer.
+    - We can use [[file:/home/mira/orgfiles/roam/20250410003709-Rust_builtins.org::*~heapvar.clone()~][~.clone()~]] for deep-copying.
+*** References and Borrowing
+    - Unlike pointers, references are /guaranteed/ to point to a valid value of a particular type for the life of that reference.
+    - References allow us to *borrow* heap-allocated variables, instead of moving them.
+      - Immutable by default
+        - ~&mut String~ ~&mut var_name~ creates a mutable reference.
+**** Mutable References
+     - If you have a mutable reference to a value, you can have no other references to that value.
+       - This is to ensure referential integrity.
+
+** Structs
+   - Access with dot notation.
+   - Field initialization can use a shorthand when the variable assigned is the same as the field name.
+   - Struct update syntax sugar when moving/copying over fields
+     - ~..struct2~
+   - /Tuple/ structs are created by naming tuples.
+   - /Unit/ structs are created by assigning nothing to a struct name.
+*** Syntax
+    #+BEGIN_SRC rust
+    struct UnitStruct
+    struct Point(i32, i32)
+    struct User {
+      active: bool,
+      username: String,
+    }
+
+    let username = String::from("mira");
+    let user1 = User {
+      active: true,
+      username,
+    };
+    #+END_SRC
+*** Methods
+    - Methods can be /implemented/ on structs, enums, and =[[Traits][traits]]=.
+    - Relevant keyword is ~impl Structname~.
+    - Their first parameter is always a variant of ~self~.
+      - Could be an immutable reference, or a mutable one.
+        - ~&self~ is short for ~self: &Self~.
+          - likewise, ~&mut self~ for the mutable reference
+      - Could transfer ownership.
+      - Automatic dereferencing is performed.
+**** Syntax
+     #+BEGIN_SRC rust
+     struct Rectangle {
+       length: u64,
+       width: u64,
+     }
+
+     impl Rectangle {
+       fn area(&self) -> u32 {
+         self.length * self.width
+       }
+     }
+
+     let rect = Rectangle { length: 5, width: 5 };
+     let area = rect.area();
+     #+END_SRC
+*** Associated Functions
+    - Namespaced functions within the ~impl~ block.
+      - Accessed with double colon ~::~ like ~String::new()~
+        - also known as /Paamayim Nekutodayim/!
+**** Syntax
+     #+BEGIN_SRC rust
+     impl Rectangle {
+       fn square(side: u64) -> Self {
+         Self { length: side, width: side }
+       }
+     }
+
+     let sq = Rectangle::square(5);
+     #+END_SRC
+** Enums
+   - Same as =zig= ~union(enum)~ (Tagged Unions).
+     - Variants can hold values
+   - We access a variant using double colon ~::~.
+     - We can think of it as being namespaced.
+
+** Hash Maps
+   - From ~std::collections::HashMap~.
+*** Syntax
+    #+BEGIN_SRC rust
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Green"), 50);
+
+    let score = scores.get("Blue").copied().unwrap_or(0);
+    #+END_SRC
+** ~Option~
+   - An [[Enums][enum]] that is either a ~Some(T)~ or a ~None~.
+   - Propagating ~None~ can be done with ~?~.
+** ~Result~
+   - An [[Enums][enum]] can be either ~Ok(T)~ or ~Err(E)~.
+   - Propagating ~Err(E)~ can be done with ~?~.
+
+** Generics
+   - A type generic can be specified by appending ~<T>~.
+     - works for structs, enums, function names, function parameters, impl blocks
+       - Extra generics can be comma-separated
+       - The type can be further restricted by specifying /[[Traits][traits]]/. 
+         - ~<T: cmp::PartialOrd>~
+         - ~<T> where T: cmp::PartialOrd~
+           - ~where~ syntax can also apply bounds to arbitrary types, not just type parameters
+         - ~impl cmp::PartialOrd~
+         - These are called /bounds/.
+** Traits
+   - A trait specifies shared behavior between types.
+     - It does so in an /abstract/ way.
+   - A trait can have a default implementation by defining a function body for any method.
+*** Syntax
+    #+BEGIN_SRC rust
+    struct Blog;
+
+    trait Summary {
+      fn summarize(&self) -> String;
+    }
+
+    impl Summary for Blog {
+      fn summarize(&self) -> String {
+        // ...
+      }
+    }
+    #+END_SRC
+
+*** Common Traits
+    - ~Clone~ and ~Copy~
+    - ~Display~ and ~Debug~
+    - ~PartialOrd~
+* Builtins
+  - See [[id:8cd0f5f9-7155-4b64-987a-f693b9820614][Rust builtins]] 
