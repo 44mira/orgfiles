@@ -29,25 +29,50 @@
     :PROPERTIES:
     :CUSTOM_ID: osi-application
     :END:
+    - To allow access to network resources.
+    - Responsible for *providing services* to the user.
 *** Presentation
+    - To translate encrypt and compress data.
+    - Responsible for *translation, compression, and encryption*
+    - Concerned with the syntax and semantics of the information exchanged between two systems.
 *** Session
+    - To establish, manage, and terminate sessions.
+    - Responsible for *dialog control and synchronization*
+    - *Network dialog controller*
+      - Establishes, maintains, and synchronizes the interaction among communcating systems.
 *** Transport
+    - To provide reliable process-to-process message delivery and error recovery.
+    - Responsible for the delivery of a *message* from one /process/ to another.
+      - A process is an application program running on a host.
+**** Other responsibilities
+     - Service-point (port) adressing
+     - Segmentation and reassembly
+     - Flow control (end to end), error control (process to process)
+     - Connection control
 *** Network
+    - To move packets from source to destination; to provide internetworking.
     - Responsible for delivery of individual *packets* from the source host to the destination host.
+    - Source-to-destination delivery of packets can be across multiple networks ([[Data Link][links]]).
+**** Other responsibilities:
+     - Logical addressing, address transformation
+     - Multiplexing
+     - Routing
 *** Data Link
+    - To organize bits into frames; to provide hop-to-hop delivery.
     - Responsible for moving *frames*.
     - Node-to-node delivery
     - Transforms the raw transmission into a reliable link
-    - Other responsibilities:
-      - Framing, physical addressing
-      - Flow control, error control, access control
+**** Other responsibilities:
+     - Framing, physical addressing
+     - Flow control, error control, access control
 *** Physical
+    - To transmit bits over a medium; to provide mechanical and electrical specifications.
     - Responsible for movement of *bits* from one hop (node) to the next
     - Deals with mechanical and electrical specs of the interface and medium
-    - Concerned with the following:
-      - Line configuration, topology
-      - Transmission mode, transmission medium
-      - Interface, signals, encoding
+**** Concerned with the following:
+     - Line configuration, topology
+     - Transmission mode, transmission medium
+     - Interface, signals, encoding
 * TCP/IP
   - /Transmission Control Protocol/ / /Internet Protocol/
   - A set of standards that describe how data is to be transferred between computers.

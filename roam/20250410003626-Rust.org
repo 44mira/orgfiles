@@ -304,5 +304,52 @@
     - ~Clone~ and ~Copy~
     - ~Display~ and ~Debug~
     - ~PartialOrd~
+
+** Lifetimes
+   - Ensures that a [[References and Borrowing][reference]] is valid as long as we need them to be.
+   - Most of the time, implicit and inferred
+   - The compiler has a /borrow checker/ that validates lifetimes.
+   - Lifetimes need to be specified in cases where the borrow checker cannot infer it.
+     - They do not specify how long a reference lives. Rather describes its relationships with other references.
+   - Declared in function names with the same syntax for type constraints.
+     - Functions that return a reference must have a lifetime related to its parameters
+       - This is because it is impossible to return a reference to a local variable within a function scope.
+   - It can be used to declare =struct= lifetime relative to its properties.
+   - A ~'static~ lifetime can be assigned to a reference that lasts for the duration of the program.
+*** Syntax
+    #+BEGIN_SRC rust
+    let a: &i32; // a reference
+    let b: &'a i32; // a ref with an explicit lifetime
+    let c: &'a mut i32; // mutable ref with an explicit lifetime
+    #+END_SRC
+*** Lifetime Ellision Rules
+    1. Each parameter that is a reference gets its own lifetime parameter.
+    2. If there is exactly one input lifetime parameter, assign it to all output lifetime parameters.
+    3. If one of the multiple input lifetime parameters is a reference to ~self~, assign that to all output lifetime parameters.
+** Testing
+    - Tests are specified by annotating a function with the [[~#[test]~][test]] [[Attributes][attribute]].
+    - Run with ~cargo test~ inside a Rust project.
+    - Test functions use assert macros such as ~assert_eq!~ and ~assert!~ to determine correctness.
+      - To be general, tests fail when a /panic/ occurs within it. 
+      - They can also just return a ~Result<(), E>~ type
+        - Useful for the ~?~ shorthand for terser tests based on dependent code.
+    - The attribute ~#[should_panic]~ describes a test.
+      - Can take in an expected panic message.
+
+** Attributes
+   - Freeform metadata for pieces of Rust code.
+   - Syntax is a poundsign followed by square brackets that enclose the atttribute.
+     - An exclamation mark after the hashtag denotes an /inner/ attribute.
+       - To be used inside function scopes.
+*** Common attributes
+**** ~#[derive(trait)]~
+     - Try to derive a [[Traits][trait]] for a specific type.
+**** ~#[cfg(cond)]~
+     - Conditionally compile a module.
+     - Common use is for conditionally compiling test modules with ~#[cfg(test)]~
+**** ~#[test]~
+     - Specify a unit test function.
+**** ~#[allow(rule)]~
+     - Surpress a warning/error.
 * Builtins
   - See [[id:8cd0f5f9-7155-4b64-987a-f693b9820614][Rust builtins]] 

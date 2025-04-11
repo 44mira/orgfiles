@@ -8,7 +8,16 @@
 ** ~println!~ and ~print!~
    - Main standard output of the program.
    - Format input using ={}= and providing variable args.
-
+** ~format!~
+   - Takes in a formatted string and returns a ~String~.
+** ~assert!~
+   - panics when the argument is ~false~.
+   - takes in an optional ~message~ argument.
+** ~assert_eq!~ and ~assert_ne!~
+   - prints the two arguments.
+   - panics when the 2 arguments are not equal or equal, respectively.
+   - takes in an optional ~message~ argument.
+* Methods
 ** ~collection.iter()~ and ~collection.iter_mut()~
    - Provide iterators for collections.
 ** ~heapvar.clone()~

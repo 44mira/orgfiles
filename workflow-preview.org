@@ -1,0 +1,69 @@
+#+TITLE:     My workflow as a 10x Computer Science Student
+#+AUTHOR:    44mira
+#+DATE:      2025-04-11
+
+* Linux
+** Window manager (=Hyprland=)
+   - Tiling window manager
+     - Allows for efficient use of screen space
+   - Poweruser-centric key mappings
+   - Human-friendly configuration
+     - Very nice documentation
+** Shell
+*** Tooling
+    - =zsh=
+    - =zoxide=
+    - =eza=
+    - GNU-Linux binaries
+*** =kitty=
+    - Multiplexer
+    - Terminal graphics protocol 
+    - Very tidy configuration
+* Neovim
+** Terminal-based text editor
+   - Yup, this is on the terminal.
+** Has a lot of pretty cool keymaps for general text editing
+   - Check out my keystrokes! (Top right).
+   - speed speed speed speed
+** Very extensible
+   - Configurable in =Lua= (=and vimscript I guess=).
+   - Very rich ecosystem for plugins.
+* Developing
+** Neovim as an IDE
+   - LSPs
+     - Completion
+     - Diagnostics
+   - Treesitter Highlighting
+   - Snippets
+   - Debugger
+   - Copilot support (/exists/)
+     - I personally don't use it.
+   - Fast directory traversal
+   - Paired with a terminal multiplexer (=tmux=, =kitty=)
+   - ... all the other tooling I could need
+** LazyGit
+   - I believe I'm familiar enough with Git to warrant a much more accessible interface
+   - I think it contributed a significant speedup and increase in quality to my Git workflow.
+     - Line-specific commits
+     - Rebases
+* Orgmode
+** Originally of Emacs fame
+   - A Markup language
+   - There's a Neovim port!
+     - A bit buggy but workable!
+** *Zettelkasten* (note box)
+   - An orgmode extension, =Org-roam= facilitates this method
+   - Notes contain a single idea or concept (*atomic*).
+     - stored in a *database*, and linked together.
+       - Org-roam allows for interfacing with these links
+       - Also provides a neat API for their database!
+         - Originally depended on =sqlite=, but the port uses a Lua implementation of the database
+   - Capture notes whenever, and add them into the Zettelkasten!
+* LaTeX
+** Neovim integration with =vimtex= and =LuaSnip=
+   - =vimtex= provides a workflow out-of-the-box.
+     - This includes compiling, exporting, and cleaning artifacts.
+   - =LuaSnip= allows for better writing experience with snippets.
+** Thesis!
+   - It looks cool
+   - Syntax for math and code
